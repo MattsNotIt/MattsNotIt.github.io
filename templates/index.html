@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera</title>
+</head>
+<body>
+    <h1>Live Camera</h1>
+    <img src="{{ url_for('video_feed') }}" width="640" height="480">
+
+    <h1>List Of People</h1>
+    <ul id="user-list">
+        {% for user in users %}
+        <li>{{ user }}</li>
+        {% endfor %}
+    </ul>
+
+    <h1>Button</h1>
+    <form action="/test" method="post">
+        <button type="submit">Test Night Vision (Not working) </button>
+    </form>
+
+    <!-- WebSocket connection script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script>
+        var socket = io();
+    
+        socket.on('update_users', function(data) {
+            var userList = document.getElementById('user-list');
+            if (userList) {
+                userList.innerHTML = '';
+                data.users.forEach(function(user) {
+                    var li = document.createElement('li');
+                    li.textContent = user;
+                    userList.appendChild(li);
+                });
+            }
+        });
+    
+        // Send a message to the server when the client is disconnected
+        window.addEventListener('beforeunload', function() {
+            socket.disconnect(); // Disconnect the socket explicitly
+            socket.emit('disconnect'); // Emit the disconnect event
+        });
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Name</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form id="login-form" action="{{ url_for('process_login') }}" method="post">
+        <label for="username">Enter your name:</label>
+        <input type="text" id="username" name="username">
+        <input type="hidden" id="deviceName" name="devicename"> <!-- Change name to lowercase -->
+        <button type="submit">Login</button>
+    </form>
+
+    <!-- WebSocket connection script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script>
+        var socket = io();
+        
+        // Function to get the device name based on user agent
+        function getDeviceName() {
+            var userAgent = navigator.userAgent;
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+                return 'Mobile Device';
+            } else if (/Windows/i.test(userAgent)) {
+                return 'Windows';
+            } else if (/Macintosh/i.test(userAgent)) {
+                return 'Mac';
+            } else if (/Linux/i.test(userAgent)) {
+                return 'Linux';
+            } else {
+                return 'IDK';
+            }
+        }
+
+        // Set the device name in the hidden input field when the form is submitted
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            var deviceName = getDeviceName();
+            document.getElementById('deviceName').value = deviceName;
+        });
+
+        // Update user list when there's an update
+        socket.on('update_users', function(data) {
+            var userList = document.querySelector('ul');
+            if (userList) {
+                userList.innerHTML = '';
+                data.users.forEach(function(user) {
+                    var li = document.createElement('li');
+                    li.textContent = user;
+                    userList.appendChild(li);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
